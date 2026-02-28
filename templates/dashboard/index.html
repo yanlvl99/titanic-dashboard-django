@@ -102,6 +102,23 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  {% include 'dashboard/scripts.html' %}
+  <script>
+  // Variáveis Django disponíveis globalmente
+  window.djangoData = {
+    classes: {{classes|safe}},
+    total_male: {{total_male|safe}},
+    total_female: {{total_female|safe}},
+    total_fare: "{{total_fare|safe}}",
+    total_survived: {{total_survived|safe}},
+    survived_rate: {{survived_rate|safe}},
+    countByClass: {{count_by_class|safe}},
+    top10: {{top_10_fares|safe}},
+    survivedByClass: {{survived_by_class|safe}},
+    diedByClass: {{died_by_class|safe}},
+    ports: {{ports|safe}},
+    embarkedData: {{embarked_by_class|safe}}
+  };
+  </script>
+  <script src="{% static 'scripts/scripts.js' %}"></script>
 </body>
 </html>

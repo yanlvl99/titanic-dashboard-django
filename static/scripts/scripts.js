@@ -1,4 +1,4 @@
-<script>
+
 // Set Chart.js global dark theme
 Chart.defaults.font.color = '#e5e7eb'
 Chart.defaults.color = '#e5e7eb'
@@ -10,19 +10,19 @@ Chart.defaults.scales = {
   y: { grid: { color: '#374151' }, ticks: { color: '#e5e7eb' } }
 }
 
+console.log(window.djangoData)
+const classes = window.djangoData.classes
+const countByClass = window.djangoData.countByClass
 
-const classes = {{classes}}
-const countByClass = {{count_by_class}}
-
-const top10 = {{top_10_fares|safe}}
+const top10 = window.djangoData.top10
 const topNames = top10.map(r => r.Name.split(',')[0])
 const topFares = top10.map(r => r.Fare)
 
-const survivedByClass = {{survived_by_class}}
-const diedByClass = {{died_by_class}}
+const survivedByClass = window.djangoData.survivedByClass
+const diedByClass = window.djangoData.diedByClass
 
-const ports = {{ports|safe}}
-const embarkedData = {{embarked_by_class|safe}}
+const ports = window.djangoData.ports
+const embarkedData = window.djangoData.embarkedData
 
 // Charts
 new Chart('chart-class-donut', {
@@ -128,5 +128,3 @@ new Chart('chart-embarked-class', {
     }
   }
 })
-
-</script>
