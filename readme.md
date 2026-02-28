@@ -65,3 +65,96 @@ def index(request):
 ## Commit 86448e0
 
 - Completar o código em dashboard/views.py para enviar todo o contexto com dados extraídos do bando de dados.
+
+## Commit 585e943
+
+- Adiciona suite completa de testes com pytest
+- Configura pytest com pytest.ini para integração com Django
+- Implementa testes unitários para modelos, views, URLs e dados CSV
+- Adiciona testes de integração para funcionalidade completa do dashboard
+- Corrige injeção de variáveis Django para JavaScript via objeto global window.djangoData
+- Atualiza views.py para processamento correto de dados CSV e KPIs do banco
+- Importa dados dos passageiros do CSV para o banco de dados SQLite
+- Corrige renderização do template com filtros |safe adequados
+- Separa arquivos JavaScript dos templates para melhor organização
+- Adiciona tratamento de erro para divisão por zero no cálculo de taxas
+
+### Como executar os testes
+
+```bash
+# Instalar dependências de teste
+pip install pytest pytest-django
+
+# Executar todos os testes
+pytest
+
+# Executar testes com detalhes
+pytest -v
+
+# Executar apenas testes do dashboard
+pytest dashboard/tests.py
+
+# Executar testes de integração
+pytest test_integration.py
+```
+
+### Estrutura dos testes
+
+- **Model Tests**: Testa criação, contagem e validação de passageiros
+- **View Tests**: Testa renderização, contexto e KPIs do dashboard
+- **CSV Tests**: Testa integridade e estrutura dos dados do CSV
+- **URL Tests**: Testa resolução e nomes das URLs
+- **Integration Tests**: Testa fluxo completo e consistência de dados
+
+### População do banco de dados
+
+O projeto agora importa automaticamente os dados do arquivo `titanic.csv` para o banco de dados SQLite:
+
+```bash
+# Importar dados do CSV para o banco
+python manage.py shell -c "
+import pandas as pd
+from dashboard.models import TitanicPassenger
+
+df = pd.read_csv('static/data/titanic.csv')
+if 'SAgeex' in df.columns:
+    df['Sex'] = df['SAgeex'].apply(lambda x: str(x).split()[0] if isinstance(x, str) and ' ' in str(x) else x)
+    df['Age'] = df['SAgeex'].apply(lambda x: float(str(x).split()[1]) if isinstance(x, str) and ' ' in str(x) and len(str(x).split()) > 1 else None)
+
+count = 0
+for _, row in df.iterrows():
+    TitanicPassenger.objects.create(
+        name=row['Name'],
+        sex=row['Sex'] if pd.notna(row['Sex']) else None,
+        age=row['Age'] if pd.notna(row['Age']) else None,
+        fare=row['Fare'] if pd.notna(row['Fare']) else None,
+        survived=bool(row['Survived']),
+        embarked=row['Embarked'] if pd.notna(row['Embarked']) else None,
+        pclass=int(row['Pclass']) if pd.notna(row['Pclass']) else None
+    )
+    count += 1
+
+print(f'Importados {count} passageiros')
+"
+```
+
+### Variáveis JavaScript
+
+As variáveis Django agora são injetadas no JavaScript através do objeto global `window.djangoData`:
+
+```javascript
+// Disponível no scripts.js
+window.djangoData = {
+    classes: {{classes|safe}},
+    total_male: {{total_male|safe}},
+    total_female: {{total_female|safe}},
+    total_fare: "{{total_fare|safe}}",
+    total_survived: {{total_survived|safe}},
+    survived_rate: {{survived_rate|safe}},
+    countByClass: {{count_by_class|safe}},
+    top10: {{top_10_fares|safe}},
+    survivedByClass: {{survived_by_class|safe}},
+    diedByClass: {{died_by_class|safe}},
+    ports: {{ports|safe}},
+    embarkedData: {{embarked_by_class|safe}}
+};
